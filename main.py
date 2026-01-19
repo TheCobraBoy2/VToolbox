@@ -17,7 +17,7 @@ def patch_spotify():
   root.open_popup("Patch Spotify", "This has only been tested on Windows.\n This is platform dependent and may not work on linux distros or MacOS.\n Do you want to continue?", yes=patchers.patch_spotify)
 
 def open_source():
-  webbrowser.open_new_tab("")
+  webbrowser.open_new_tab("https://github.com/TheCobraBoy2/VToolbox")
 
 root.welcome()
 
