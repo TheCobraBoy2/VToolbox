@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from typing import Optional
 import os
+import sys
 import json
 
 DEFAULT_CONFIG = {"show_welcome": True}
@@ -8,6 +9,12 @@ home_dir = os.path.expanduser("~")
 config_dir = os.path.join(home_dir, ".VToolBox")
 config_path = os.path.join(config_dir, "config.json")
 
+def resource_path(relative_path: str) -> str:
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 def should_show_welcome(config_key: str = "show_welcome") -> bool:
     if not os.path.exists(config_path):
@@ -29,7 +36,7 @@ class App:
 
     def __init__(self, title="Toolbox", size="500x400", resizable=(False, False)):
         ctk.set_appearance_mode("System")
-        ctk.set_default_color_theme("resources/red_theme.json")
+        ctk.set_default_color_theme(resource_path("resources/red_theme.json"))
       
         self.root = ctk.CTk()
         self.root.title(title)
