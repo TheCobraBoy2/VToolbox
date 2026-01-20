@@ -1,0 +1,1 @@
+python -m PyInstaller --onefile --windowed --add-data "resources;resources" src/main.py
