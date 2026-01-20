@@ -58,8 +58,8 @@ root.place_button("github", row=2, column=0, pady=20, padx=50, sticky="w")
 root.place_button("config", row=2, column=1, pady=20, padx=50, sticky="e")
 
 
-root.add_page("Home", home_page, starting_page=True)
-root.add_page("Patchers", patchers_page)
-root.add_page("Info", info_page)
+root.add_page("home", "Home", home_page, starting_page=True)
+root.add_page("patchers", "Patchers", patchers_page)
+root.add_page("info", "Info", info_page)
 
 root.run()

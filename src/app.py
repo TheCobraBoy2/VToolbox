@@ -31,6 +31,7 @@ class App:
   labels = {}
   config = {}
   frames = {}
+  pages_to_draw = []
     
   starting_page = None
 
@@ -184,26 +185,51 @@ class App:
     return frame
 
   # If starting_page has already been passed true once then it will be ignored on subsequent calls
-  def add_page(self, page_name: str, frame: ctk.CTkFrame, starting_page: bool=False):
-    # Add a page to the content area and create a navbar button
-    self.frames[page_name] = frame
+  # Now polling the drawing of pages until run is called
+  def add_page(self, id: str, name: str, frame: ctk.CTkFrame, starting_page: bool=False, order_index: int=None):
     frame.grid(row=0, column=0, sticky="nsew")
     frame.grid_remove()
-
-    def show():
-      self.show_page(page_name)
-
-    button = ctk.CTkButton(self.navbar, text=page_name, width=130, command=show)
-    button.grid(pady=10, padx=10, sticky="ew")
-
+    self.pages_to_draw.append({
+      "id": id,
+      "name": name,
+      "frame": frame,
+      "starting_page": starting_page,
+      "order_index": order_index
+      })
     if starting_page and self.starting_page is None:
-      self.starting_page = page_name
+      self.starting_page = id
+    self.frames[id] = frame
 
-  def show_page(self, page_name: str):
+
+    # # Add a page to the content area and create a navbar button
+    # frame.grid(row=0, column=0, sticky="nsew")
+    # frame.grid_remove()
+
+    # def show():
+    #   self.show_page(id)
+    
+    # if order_index is not None:
+    #   row=order_index
+    #   used_rows = {btn.grid_info()["row"] for btn in self.navbar.winfo_children()}
+    #   while row in used_rows:
+    #     row += 1
+    # else:
+    #   row = list(self.frames.keys()).index(id)
+    #   used_rows = {btn.grid_info()["row"] for btn in self.navbar.winfo_children()}
+    #   while row in used_rows:
+    #     row += 1
+
+    # button = ctk.CTkButton(self.navbar, text=name, width=130, command=show)
+    # button.grid(row=row, pady=10, padx=10, sticky="ew")
+
+    # if starting_page and self.starting_page is None:
+    #   self.starting_page = id
+
+  def show_page(self, id: str):
     # Hide all frames and show the selected one
     for name, frame in self.frames.items():
       frame.grid_remove()
-    self.frames[page_name].grid()
+    self.frames[id].grid()
 
   # Buttons
   def register_button(self, id: str, host=None, text="New Button", command=None, width=140, height=28):
@@ -227,7 +253,25 @@ class App:
     label = self.labels.get(id)
     label.grid(row=row, column=column, padx=padx, pady=pady, **kwargs)
 
+  def _draw_navbar_buttons(self):
+    pages = sorted(
+      self.pages_to_draw,
+      key=lambda x: x["order_index"] if x["order_index"] is not None else len(self.pages_to_draw)
+    )
+    for row, page in enumerate(pages):
+      button = ctk.CTkButton(
+        self.navbar,
+        text=page["name"],
+        width=130,
+        command=lambda pid=page["id"]: self.show_page(pid)
+      )
+      button.grid(row=row, pady=10, padx=10, sticky="ew")
+      # Optional: store buttons if you need them later
+      self.buttons[page["id"]] = button
+
   def run(self):
+    self._draw_navbar_buttons()
+
     if self.starting_page:
       self.show_page(self.starting_page)
     self.root.mainloop()
