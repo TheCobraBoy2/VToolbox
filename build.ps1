@@ -1,1 +1,1 @@
-python -m PyInstaller --onefile --windowed --add-data "resources;resources" src/main.py
+python -m PyInstaller --onefile --windowed --add-data "resources;resources" --icon=resources/icon.ico src/main.py

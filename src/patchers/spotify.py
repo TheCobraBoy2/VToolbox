@@ -58,4 +58,11 @@ def patch_spotify(popup):
   threadutil.run_in_thread(threaded)
   popup.destroy()
 
-__all__ = ["patch_spotify"]
+def get_button_data():
+  return {
+    "id": "spicetify",
+    "readable": "Patch Spotify",
+    "cmd": patch_spotify
+  }
+
+__all__ = ["patch_spotify", "get_button_data"]

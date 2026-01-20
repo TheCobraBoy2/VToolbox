@@ -1,5 +1,7 @@
 import customtkinter as ctk
+from tkinter import PhotoImage
 from typing import Optional
+from versionverifier import is_outdated
 import os
 import sys
 import json
@@ -32,7 +34,7 @@ class App:
   config = {}
   frames = {}
   pages_to_draw = []
-    
+
   starting_page = None
 
   def __init__(self, title="Toolbox", size="500x400", resizable=(False, False)):
@@ -40,19 +42,24 @@ class App:
     ctk.set_default_color_theme(resource_path("resources/red_theme.json"))
       
     self.root = ctk.CTk()
+
+    self.icon_bitmap = PhotoImage(resource_path("resources/icon.ico"))
+
     self.root.title(title)
     self.root.geometry(size)
     self.root.resizable(resizable[0], resizable[1])
+    self.root.iconbitmap(self.icon_bitmap)
         
     self.root.grid_columnconfigure(0, weight=0)  # Sidebar column
     self.root.grid_columnconfigure(1, weight=1)  # Content column
     self.root.grid_rowconfigure(0, weight=1)
+    self.root.grid_rowconfigure(1, weight=1)
 
-    self.navbar = ctk.CTkFrame(self.root, width=150)
-    self.navbar.grid(row=0, column=0, sticky="ns")
+    self.navbar = ctk.CTkFrame(self.root, width=150, corner_radius=0)
+    self.navbar.grid(row=0, column=0, sticky="nsew")
     self.navbar.grid_propagate(False)
 
-    self.content_container = ctk.CTkFrame(self.root)
+    self.content_container = ctk.CTkFrame(self.root, corner_radius=0)
     self.content_container.grid(row=0, column=1, sticky="nsew")
     self.content_container.grid_rowconfigure(0, weight=1)
     self.content_container.grid_columnconfigure(0, weight=1)
@@ -108,16 +115,20 @@ class App:
     popup.transient(self.root)
     popup.grab_set()
 
+    popup.grid_rowconfigure(0, weight=1)
+    popup.grid_columnconfigure(0, weight=1)
+
     outer_frame = ctk.CTkFrame(popup, corner_radius=15)
-    outer_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+    outer_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
     outer_frame.grid_rowconfigure(2, weight=1)
+    outer_frame.grid_columnconfigure(0, weight=1)
 
     header = ctk.CTkLabel(
       outer_frame,
       text="Welcome to Toolbox!",
       font=ctk.CTkFont(size=18, weight="bold")
     )
-    header.grid(row=0, column=0, pady=(0, 10))
+    header.grid(row=0, column=0, pady=(0, 10), sticky="new")
 
     message_text = (
       "This is in early development, so expect bugs and missing features.\n\n"
@@ -137,17 +148,17 @@ class App:
     dont_show_again = ctk.CTkCheckBox(outer_frame, text="Don't show this again")
     dont_show_again.grid(row=3, column=0, pady=(0, 10))
 
-  def ok_clicked():
-    try:
-      with open(config_path, "r+", encoding="utf-8") as f:
-        data = json.load(f)
-        data[config_key] = not dont_show_again.get()
-        f.seek(0)
-        f.truncate()
-        json.dump(data, f, indent=2)
-    except (json.JSONDecodeError, OSError):
-      pass
-    popup.destroy()
+    def ok_clicked():
+      try:
+        with open(config_path, "r+", encoding="utf-8") as f:
+          data = json.load(f)
+          data[config_key] = not dont_show_again.get()
+          f.seek(0)
+          f.truncate()
+          json.dump(data, f, indent=2)
+      except (json.JSONDecodeError, OSError):
+        pass
+      popup.destroy()
 
     ok_button = ctk.CTkButton(outer_frame, text="OK", width=100, command=ok_clicked)
     ok_button.grid(row=4, column=0, pady=(0, 10))
@@ -178,7 +189,7 @@ class App:
     
   # You need to configure columns if you want more than one to be flexible
   def register_page(self, id: str, flexible: bool = False):
-    frame = ctk.CTkFrame(self.content_container)
+    frame = ctk.CTkFrame(self.content_container, corner_radius=0)
     if flexible:
       frame.grid_columnconfigure(0, weight=1)
     self.frames[id] = frame
@@ -231,6 +242,18 @@ class App:
       frame.grid_remove()
     self.frames[id].grid()
 
+  # Patchers
+
+  # This also places the patcher on the grid
+  def register_patcher(self, patcher, host=None, command=None):
+    data = patcher.get_button_data()
+    if command is not None:
+      cmd = command
+    else:
+      cmd = data["cmd"]
+    self.register_button(data["id"], host=host, text=data["readable"], command=cmd)
+    self.place_button(data["id"], row=0, column=0, padx=20, pady=20, sticky="w")
+
   # Buttons
   def register_button(self, id: str, host=None, text="New Button", command=None, width=140, height=28):
     if host is None:
@@ -268,6 +291,41 @@ class App:
       button.grid(row=row, pady=10, padx=10, sticky="ew")
       # Optional: store buttons if you need them later
       self.buttons[page["id"]] = button
+
+  def register_version(self, current, host=None):
+    if not is_outdated(current):
+      return
+
+    self.root.rowconfigure(0, weight=0)
+    cr = 90
+    if host is None:
+      host = self.root
+      cr=0
+
+    # Banner at the top
+    banner = ctk.CTkFrame(
+      host,
+      corner_radius=cr,
+      fg_color="#ffd900",
+    )
+    banner.grid(row=0, column=0, padx=10, sticky="ew", columnspan=2)
+    banner.grid_columnconfigure(0, weight=1)
+
+    self.register_label(
+      "outdated",
+      host=banner,
+      text="The current client is outdated. Update through GitHub.",
+      font=ctk.CTkFont(size=16),
+      text_color="#000"
+    )
+    self.place_label("outdated", row=0, column=0, padx=20)
+
+    # IMPORTANT: push existing content down
+    for child in host.winfo_children():
+      info = child.grid_info()
+      if int(info.get("row", 0)) == 0 and child is not banner:
+        child.grid(row=1)
+
 
   def run(self):
     self._draw_navbar_buttons()

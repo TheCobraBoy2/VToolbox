@@ -1,1 +1,3 @@
-from .spotify import *
+from . import spotify
+
+__all__ = ["spotify"]

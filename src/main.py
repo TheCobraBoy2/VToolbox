@@ -8,21 +8,25 @@ def patch_spotify():
   root.open_popup("Patch Spotify",
                    "This has only been tested on Windows.\n"
                     "This is platform dependent and may not work on linux distros or MacOS.\n"
-                    "Do you want to continue?", size="425x150", yes=patchers.patch_spotify)
+                    "Do you want to continue?", size="425x150", yes=patchers.spotify.patch_spotify)
 
 def open_source():
   webbrowser.open_new_tab("https://github.com/TheCobraBoy2/VToolbox")
 
-root = App(size="600x500", title="VToolBox")
+root = App(size="600x500", title="VToolbox")
 
 CONFIG = {
   "show_welcome": True
 }
 
-CURRENT_VERSION = "1.0.0"
+CURRENT_VERSION = "0.0.1"
 
 root.new_config(CONFIG)
 root.reconcile_config()
+
+root.register_version(CURRENT_VERSION)
+
+root.welcome()
 
 # Home Page
 home_page = root.register_page("home", flexible=True)
@@ -36,8 +40,9 @@ root.place_label("instruction", row=1, column=0, pady=10, sticky="new")
 
 # Patchers Page
 patchers_page = root.register_page("patchers", flexible=True)
-root.register_button("spicetify", host=patchers_page, text="Patch Spotify", command=patch_spotify)
-root.place_button("spicetify", row=0, column=0, padx=20, pady=20, sticky="w")
+root.register_patcher(patchers.spotify, host=patchers_page, command=patch_spotify)
+# root.register_button("spicetify", host=patchers_page, text="Patch Spotify", command=patch_spotify)
+# root.place_button("spicetify", row=0, column=0, padx=20, pady=20, sticky="w")
 
 # Info Page
 info_page = root.register_page("info", flexible=True)
