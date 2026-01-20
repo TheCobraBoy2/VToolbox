@@ -19,7 +19,7 @@ CONFIG = {
   "show_welcome": True
 }
 
-CURRENT_VERSION = "0.0.1"
+CURRENT_VERSION = "0.0.2"
 
 root.new_config(CONFIG)
 root.reconcile_config()

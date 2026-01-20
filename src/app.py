@@ -53,7 +53,6 @@ class App:
     self.root.grid_columnconfigure(0, weight=0)  # Sidebar column
     self.root.grid_columnconfigure(1, weight=1)  # Content column
     self.root.grid_rowconfigure(0, weight=1)
-    self.root.grid_rowconfigure(1, weight=1)
 
     self.navbar = ctk.CTkFrame(self.root, width=150, corner_radius=0)
     self.navbar.grid(row=0, column=0, sticky="nsew")
@@ -297,6 +296,7 @@ class App:
       return
 
     self.root.rowconfigure(0, weight=0)
+    self.root.rowconfigure(1, weight=1)
     cr = 90
     if host is None:
       host = self.root
