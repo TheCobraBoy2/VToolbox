@@ -29,7 +29,7 @@ class App:
 
     def __init__(self, title="Toolbox", size="500x400", resizable=(False, False)):
         ctk.set_appearance_mode("System")
-        ctk.set_default_color_theme("red_theme.json")
+        ctk.set_default_color_theme("resources/red_theme.json")
       
         self.root = ctk.CTk()
         self.root.title(title)
