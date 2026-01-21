@@ -244,13 +244,23 @@ class App:
   # Patchers
 
   # This also places the patcher on the grid
+  # Defaults to a frame with id patchers
   def register_patcher(self, patcher, host=None, command=None):
     data = patcher.get_button_data()
+    try:
+      if host is not None:
+        master = host
+      else:
+        master = self.frames["patchers"]
+    except KeyError:
+      print("There is no page with id \"patchers\". Please create one or provide a host page for patchers to be registered to.")
+      return None
+
     if command is not None:
       cmd = command
     else:
       cmd = data["cmd"]
-    self.register_button(data["id"], host=host, text=data["readable"], command=cmd)
+    self.register_button(data["id"], host=master, text=data["readable"], command=cmd)
     self.place_button(data["id"], row=0, column=0, padx=20, pady=20, sticky="w")
 
   # Buttons
@@ -288,7 +298,6 @@ class App:
         command=lambda pid=page["id"]: self.show_page(pid)
       )
       button.grid(row=row, pady=10, padx=10, sticky="ew")
-      # Optional: store buttons if you need them later
       self.buttons[page["id"]] = button
 
   def register_version(self, current, host=None):
@@ -298,9 +307,11 @@ class App:
     self.root.rowconfigure(0, weight=0)
     self.root.rowconfigure(1, weight=1)
     cr = 90
+    p = 10
     if host is None:
       host = self.root
       cr=0
+      p=0
 
     # Banner at the top
     banner = ctk.CTkFrame(
@@ -308,7 +319,7 @@ class App:
       corner_radius=cr,
       fg_color="#ffd900",
     )
-    banner.grid(row=0, column=0, padx=10, sticky="ew", columnspan=2)
+    banner.grid(row=0, column=0, padx=p, sticky="ew", columnspan=2)
     banner.grid_columnconfigure(0, weight=1)
 
     self.register_label(
@@ -320,7 +331,7 @@ class App:
     )
     self.place_label("outdated", row=0, column=0, padx=20)
 
-    # IMPORTANT: push existing content down
+    # push existing content down
     for child in host.winfo_children():
       info = child.grid_info()
       if int(info.get("row", 0)) == 0 and child is not banner:

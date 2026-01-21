@@ -6,7 +6,6 @@ def get_latest():
   response.raise_for_status()
 
   if response.status_code != 200:
-    # No release, rate limited, or network error
     return None
 
   data = response.json()
