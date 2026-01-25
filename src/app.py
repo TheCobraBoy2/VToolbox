@@ -174,8 +174,10 @@ class App:
     popup.transient(self.root)
     popup.grab_set()
 
-    label = ctk.CTkLabel(popup, text=label)
-    label.grid(row=0, column=0, pady=15)
+    popup.columnconfigure(0, weight=1)
+
+    label = ctk.CTkLabel(popup, text=label, wraplength=460)
+    label.grid(row=0, column=0, pady=15, sticky="nsew")
 
     button_frame = ctk.CTkFrame(popup, fg_color="transparent")
     button_frame.grid(row=1, column=0, pady=10)
@@ -183,6 +185,12 @@ class App:
     yes_button.grid(row=0, column=0, padx=10)
     no_button = ctk.CTkButton(button_frame, text="No", command=lambda: no(popup))
     no_button.grid(row=0, column=1, padx=10)
+
+  def platform_dependent_conformation(self, title: str, size: str="425x150", yes=None, no=None):
+    self.open_popup(title,
+                   "This has only been tested on Windows.\n"
+                    "This is platform dependent and may not work on linux distros or MacOS.\n"
+                    "Do you want to continue?", size=size, yes=yes, no=no)
 
   # Nav
     
@@ -322,8 +330,7 @@ class App:
     banner.grid(row=0, column=0, padx=p, sticky="ew", columnspan=2)
     banner.grid_columnconfigure(0, weight=1)
 
-    self.register_label(
-      "outdated",
+    self.register_label("outdated",
       host=banner,
       text="The current client is outdated. Update through GitHub.",
       font=ctk.CTkFont(size=16),
@@ -337,6 +344,14 @@ class App:
       if int(info.get("row", 0)) == 0 and child is not banner:
         child.grid(row=1)
 
+  def default_home(self, host: ctk.CTkFrame):
+    self.register_label("welcome", host=host, text=f"Welcome to {self.root.title()}!",
+                    font=ctk.CTkFont(size=24, weight="bold"))
+    self.register_label("instruction", host=host, text="Use the sidebar to navigate the pages.",
+                    font=ctk.CTkFont(size=16))
+
+    self.place_label("welcome", row=0, column=0, pady=(20, 10), sticky="new")
+    self.place_label("instruction", row=1, column=0, pady=10, sticky="new")
 
   def run(self):
     self._draw_navbar_buttons()

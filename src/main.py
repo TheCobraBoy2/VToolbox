@@ -5,22 +5,22 @@ import patchers
 from app import App
 from versionverifier import get_latest
 
-def patch_spotify():
-  root.open_popup("Patch Spotify",
-                   "This has only been tested on Windows.\n"
-                    "This is platform dependent and may not work on linux distros or MacOS.\n"
-                    "Do you want to continue?", size="425x150", yes=patchers.spotify.patch_spotify)
-
-def open_source():
-  webbrowser.open_new_tab("https://github.com/TheCobraBoy2/VToolbox")
-
-root = App(size="600x500", title="VToolbox")
+WINDOW_SIZE = "600x500"
+WINDOW_TITLE = "VToolbox"
+WINDOW_RESIZABLE = (False, False)
+CURRENT_VERSION = "0.0.2"
 
 CONFIG = {
   "show_welcome": True
 }
 
-CURRENT_VERSION = "0.0.2"
+def patch_spotify():
+  root.platform_dependent_conformation("Patch Spotify", yes=patchers.spotify.patch_spotify)
+
+def open_source():
+  webbrowser.open_new_tab("https://github.com/TheCobraBoy2/VToolbox")
+
+root = App(WINDOW_TITLE, WINDOW_SIZE, WINDOW_RESIZABLE)
 
 root.new_config(CONFIG)
 root.reconcile_config()
@@ -31,19 +31,13 @@ root.welcome()
 
 # Home Page
 home_page = root.register_page("home", flexible=True)
-root.register_label("welcome", host=home_page, text="Welcome to VToolbox!",
-                    font=ctk.CTkFont(size=24, weight="bold"))
-root.register_label("instruction", host=home_page, text="Use the sidebar to navigate the pages.",
-                    font=ctk.CTkFont(size=16))
-
-root.place_label("welcome", row=0, column=0, pady=50, sticky="new")
-root.place_label("instruction", row=1, column=0, pady=10, sticky="new")
+root.default_home(home_page)
 
 # Patchers Page
 patchers_page = root.register_page("patchers", flexible=True)
 root.register_patcher(patchers.spotify, command=patch_spotify)
 # root.register_button("spicetify", host=patchers_page, text="Patch Spotify", command=patch_spotify)
-# root.place_button("spicetify", row=0, column=0, padx=20, pady=20, sticky="w")
+# root.place_button("spicetify", row=0, column=0, padx=20, pady=20, sticky="w") 
 
 # Info Page
 info_page = root.register_page("info", flexible=True)
@@ -51,7 +45,9 @@ info_page = root.register_page("info", flexible=True)
 info_page.grid_columnconfigure(1, weight=1)
 root.register_label("info_header", host=info_page, text=f"VToolbox v{CURRENT_VERSION}",
                     font=ctk.CTkFont(size=20, weight="bold"))
-root.register_label("info_latest", host=info_page, text=f"Latest version: v{get_latest()}", font = ctk.CTkFont(size=12, weight="bold"))
+root.register_label("info_latest", host=info_page, 
+                    text=f"Latest version: v{get_latest()}", 
+                    font = ctk.CTkFont(size=12, weight="bold"))
 root.register_label("info_text", host=info_page,
                     text="Visit our GitHub for source code and contributions.",
                     font=ctk.CTkFont(size=14), justify="left", wraplength=400)
